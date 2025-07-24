@@ -17,77 +17,92 @@ const SpaceScene = ({ currentSection, onSectionChange }: SpaceSceneProps) => {
   const { camera } = useThree();
   const groupRef = useRef<THREE.Group>(null);
 
-  // Define planet positions and properties
+  // Define planet positions and properties - realistic solar system inspired
   const planets = useMemo(() => [
+    // Active sections
     {
       id: 'projects' as SectionType,
-      position: new THREE.Vector3(15, 5, -10),
-      color: '#00BFFF',
-      size: 2,
-      label: 'Projects Galaxy'
+      position: new THREE.Vector3(18, 6, -12),
+      color: '#4A90E2',
+      size: 2.2,
+      label: 'Projects Galaxy',
+      planetType: 'earth' as const,
+      isActive: true
     },
     {
       id: 'skills' as SectionType,
-      position: new THREE.Vector3(-12, -8, -15),
-      color: '#FF6B9D',
-      size: 1.5,
-      label: 'Skills Nebula'
+      position: new THREE.Vector3(-15, -10, -18),
+      color: '#CD5C5C',
+      size: 1.8,
+      label: 'Skills Nebula',
+      planetType: 'mars' as const,
+      isActive: true
     },
     {
       id: 'timeline' as SectionType,
-      position: new THREE.Vector3(8, -12, -20),
-      color: '#C77DFF',
-      size: 1.8,
-      label: 'Timeline Dimension'
+      position: new THREE.Vector3(12, -15, -25),
+      color: '#DAA520',
+      size: 2.5,
+      label: 'Timeline Dimension',
+      planetType: 'jupiter' as const,
+      isActive: true
     },
     {
       id: 'contact' as SectionType,
-      position: new THREE.Vector3(-20, 10, -8),
-      color: '#7209B7',
-      size: 1.3,
-      label: 'Contact Station'
+      position: new THREE.Vector3(-22, 12, -10),
+      color: '#FAD5A5',
+      size: 2.0,
+      label: 'Contact Station',
+      planetType: 'saturn' as const,
+      isActive: true
+    },
+    // Future expansion planets
+    {
+      id: 'home' as SectionType,
+      position: new THREE.Vector3(25, -5, -8),
+      color: '#FFC649',
+      size: 1.4,
+      label: 'Home Base',
+      planetType: 'venus' as const,
+      isActive: false
+    },
+    {
+      id: 'home' as SectionType,
+      position: new THREE.Vector3(-8, 18, -22),
+      color: '#8C7853',
+      size: 1.2,
+      label: 'Archive World',
+      planetType: 'mercury' as const,
+      isActive: false
+    },
+    {
+      id: 'home' as SectionType,
+      position: new THREE.Vector3(30, 8, -30),
+      color: '#4169E1',
+      size: 2.3,
+      label: 'Deep Space',
+      planetType: 'neptune' as const,
+      isActive: false
+    },
+    {
+      id: 'home' as SectionType,
+      position: new THREE.Vector3(-25, -18, -35),
+      color: '#4FD0E7',
+      size: 2.1,
+      label: 'Ice World',
+      planetType: 'uranus' as const,
+      isActive: false
     }
   ], []);
 
-  // Camera animations based on current section
+  // Scene animations (removed automatic camera movement for free control)
   useFrame((state) => {
     if (!groupRef.current) return;
 
     const time = state.clock.getElapsedTime();
     
     // Gentle rotation of the entire scene
-    groupRef.current.rotation.y = Math.sin(time * 0.1) * 0.05;
-    
-    // Camera positioning based on current section
-    const targetPosition = new THREE.Vector3();
-    const targetLookAt = new THREE.Vector3();
-
-    switch (currentSection) {
-      case 'home':
-        targetPosition.set(0, 0, 10);
-        targetLookAt.set(0, 0, 0);
-        break;
-      case 'projects':
-        targetPosition.set(12, 3, -5);
-        targetLookAt.copy(planets[0].position);
-        break;
-      case 'skills':
-        targetPosition.set(-8, -5, -10);
-        targetLookAt.copy(planets[1].position);
-        break;
-      case 'timeline':
-        targetPosition.set(5, -8, -15);
-        targetLookAt.copy(planets[2].position);
-        break;
-      case 'contact':
-        targetPosition.set(-15, 7, -3);
-        targetLookAt.copy(planets[3].position);
-        break;
-    }
-
-    // Smooth camera movement
-    camera.position.lerp(targetPosition, 0.02);
-    camera.lookAt(targetLookAt);
+    groupRef.current.rotation.y = Math.sin(time * 0.1) * 0.02;
   });
 
   const handlePlanetClick = (sectionId: SectionType) => {
@@ -96,10 +111,32 @@ const SpaceScene = ({ currentSection, onSectionChange }: SpaceSceneProps) => {
 
   return (
     <group ref={groupRef}>
-      {/* Lighting */}
-      <ambientLight intensity={0.2} />
-      <pointLight position={[10, 10, 10]} intensity={1} color="#00BFFF" />
-      <pointLight position={[-10, -10, 10]} intensity={0.5} color="#FF6B9D" />
+      {/* Enhanced Realistic Lighting */}
+      <ambientLight intensity={0.3} color="#ffffff" />
+      
+      {/* Main sun light */}
+      <directionalLight 
+        position={[50, 50, 50]} 
+        intensity={1.2} 
+        color="#ffffff"
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+      />
+      
+      {/* Secondary lights for depth */}
+      <pointLight position={[20, 20, 20]} intensity={0.8} color="#00BFFF" />
+      <pointLight position={[-20, -20, 20]} intensity={0.6} color="#FF6B9D" />
+      <pointLight position={[0, 30, -30]} intensity={0.4} color="#C77DFF" />
+      
+      {/* Rim lighting */}
+      <spotLight
+        position={[-50, 0, 50]}
+        angle={0.3}
+        penumbra={1}
+        intensity={0.5}
+        color="#ffffff"
+      />
       
       {/* Stars background */}
       <Stars 
@@ -116,15 +153,16 @@ const SpaceScene = ({ currentSection, onSectionChange }: SpaceSceneProps) => {
       <Spaceship position={[0, 0, 0]} />
 
       {/* Planets for each section */}
-      {planets.map((planet) => (
+      {planets.map((planet, index) => (
         <Planet
-          key={planet.id}
+          key={`${planet.id}-${index}`}
           position={[planet.position.x, planet.position.y, planet.position.z]}
           color={planet.color}
           size={planet.size}
           label={planet.label}
-          onClick={() => handlePlanetClick(planet.id)}
-          isActive={currentSection === planet.id}
+          onClick={() => planet.isActive && handlePlanetClick(planet.id)}
+          isActive={currentSection === planet.id && planet.isActive}
+          planetType={planet.planetType}
         />
       ))}
 
@@ -156,17 +194,20 @@ const SpaceScene = ({ currentSection, onSectionChange }: SpaceSceneProps) => {
       {/* Black hole for timeline section */}
       <BlackHole position={[0, -30, -40]} />
 
-      {/* Orbit Controls */}
+      {/* Free Orbit Controls */}
       <OrbitControls
-        enablePan={false}
+        enablePan={true}
         enableZoom={true}
         enableRotate={true}
-        zoomSpeed={0.5}
-        rotateSpeed={0.3}
-        minDistance={5}
-        maxDistance={50}
-        minPolarAngle={Math.PI / 6}
-        maxPolarAngle={Math.PI - Math.PI / 6}
+        enableDamping={true}
+        dampingFactor={0.05}
+        zoomSpeed={1.2}
+        rotateSpeed={0.8}
+        panSpeed={1.0}
+        minDistance={2}
+        maxDistance={500}
+        autoRotate={false}
+        autoRotateSpeed={0}
       />
     </group>
   );
